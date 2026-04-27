@@ -1,15 +1,85 @@
 {
   "version": 1,
   "skills": {
+    "brainstorming": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "31aab7fd68f917c6ab5475377e14001dd6f4f72a88679bc9faef9ac2c6cc17ca"
+    },
+    "dispatching-parallel-agents": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "6f85a00af7ae36fae408382d663cbcb440964a8a53ee4ee12ae32fccb9b3a841"
+    },
+    "executing-plans": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "3e5b7e1129aff11bc07b46330f0b6d82823ebfea5591247ccb992b4b43e2e4f2"
+    },
+    "finishing-a-development-branch": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "eff0217a6697cd6be04c93a28ad8e556488a18361713cf19d967d489e2caf0ff"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
       "computedHash": "516bd2154eb843a8240e43d5b285229129853114ad7075a5e141e1c08e408c84"
     },
+    "receiving-code-review": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "b90b1e180f11fa06053fc0f9fb0a957935dce35168897d1aff6be33e14545b3e"
+    },
+    "requesting-code-review": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "da2dfc5126d4d7f0547f257ef5a4e53569273698ac9d0a81db1950e8fd4654e6"
+    },
+    "subagent-driven-development": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "5f3ede03b3c711459ce9af9e02074b9595fe4ec3d8c108ffa320752431c75c35"
+    },
+    "systematic-debugging": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "75a8a456c6adf0b648d0740b86614f930539da1f2665266ab6ad744cadfd6b79"
+    },
+    "test-driven-development": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "b078532e190983b849818c11a7d4797dcbae9dfe04fadabf9b90ca5ee63650c8"
+    },
+    "using-git-worktrees": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "898e7cff32ffbc562afbca2cb858aaf9d4f7190817c5881405f1f7b5bf55e789"
+    },
+    "using-superpowers": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "5050279df0d8f24aeccfe8b6a050312b58e1674c18a8e8694d87a0eccb9f87a6"
+    },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "computedHash": "6b526d013e28073246a36f99b529bc43745d30832ecfa8217b359c34f260ca6b"
+    },
+    "verification-before-completion": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "9f704f1335e61a3ce258270d9f492cf487af55f1db0b9fc1bc5fa2173ebd38fa"
+    },
+    "writing-plans": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "cdb5eec22a3b67bf1438198749e709a471870b65e779df4830d7c43be16b4195"
+    },
+    "writing-skills": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "125cf2c0e5424a646210ce0a8f8b1903b4c6603a66c38147915a23e43762d674"
     }
   }
 }
