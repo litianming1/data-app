@@ -49,6 +49,7 @@ import {
   Trash2Icon,
   ZapIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const promptSuggestions = [
@@ -79,10 +80,10 @@ const historyItems = [
 ];
 
 const navItems = [
-  { active: true, icon: PenLineIcon, label: "新对话", shortcut: "Ctrl K" },
-  { icon: SparklesIcon, label: "AI 创作" },
-  { icon: FolderIcon, label: "云盘" },
-  { icon: Grid2X2Icon, label: "更多", trailing: true },
+  { active: true, href: "/chat", icon: PenLineIcon, label: "新对话", shortcut: "Ctrl K" },
+  { href: "/create", icon: SparklesIcon, label: "AI 创作" },
+  { href: "#", icon: FolderIcon, label: "云盘" },
+  { href: "#", icon: Grid2X2Icon, label: "更多", trailing: true },
 ];
 
 const quickModes = [
@@ -381,17 +382,8 @@ export function AIChat() {
           <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
-              return (
-                <button
-                  className={
-                    item.active
-                      ? "flex h-8 w-full items-center gap-2 rounded-xl bg-white px-2 text-left text-sm shadow-sm ring-1 ring-cyan-100"
-                      : "flex h-8 w-full items-center gap-2 rounded-xl px-2 text-left text-sm transition-colors hover:bg-white/80"
-                  }
-                  key={item.label}
-                  onClick={item.active ? resetConversation : undefined}
-                  type="button"
-                >
+              const content = (
+                <>
                   <Icon className="size-4 text-neutral-700" />
                   <span className="min-w-0 flex-1 truncate">{item.label}</span>
                   {item.shortcut && (
@@ -402,7 +394,29 @@ export function AIChat() {
                   {item.trailing && (
                     <ChevronRightIcon className="size-4 text-neutral-300" />
                   )}
-                </button>
+                </>
+              );
+              const className = item.active
+                ? "flex h-8 w-full items-center gap-2 rounded-xl bg-white px-2 text-left text-sm shadow-sm ring-1 ring-cyan-100"
+                : "flex h-8 w-full items-center gap-2 rounded-xl px-2 text-left text-sm transition-colors hover:bg-white/80";
+
+              if (item.active || item.href === "#") {
+                return (
+                  <button
+                    className={className}
+                    key={item.label}
+                    onClick={item.active ? resetConversation : undefined}
+                    type="button"
+                  >
+                    {content}
+                  </button>
+                );
+              }
+
+              return (
+                <Link className={className} href={item.href} key={item.label}>
+                  {content}
+                </Link>
               );
             })}
           </nav>
@@ -513,19 +527,17 @@ export function AIChat() {
               <h2 className="mb-7 font-semibold text-2xl tracking-tight sm:text-3xl">
                 有什么我能帮你的吗？
               </h2>
-              <Suggestions className="mx-auto max-w-3xl justify-center whitespace-normal">
-                <div className="flex max-w-3xl flex-wrap justify-center gap-2">
-                  {visibleSuggestions.map((suggestion) => (
-                    <Suggestion
-                      className="h-9 rounded-xl border border-slate-200 bg-white px-4 text-slate-800 shadow-sm shadow-slate-200/50 hover:border-cyan-200 hover:bg-cyan-50"
-                      disabled={isGenerating}
-                      key={suggestion}
-                      onClick={submitText}
-                      suggestion={suggestion}
-                    />
-                  ))}
-                </div>
-              </Suggestions>
+              <div className="flex w-full max-w-3xl flex-wrap justify-center gap-2">
+                {visibleSuggestions.map((suggestion) => (
+                  <Suggestion
+                    className="h-9 rounded-xl border border-slate-200 bg-white px-4 text-slate-800 shadow-sm shadow-slate-200/50 hover:border-cyan-200 hover:bg-cyan-50"
+                    disabled={isGenerating}
+                    key={suggestion}
+                    onClick={submitText}
+                    suggestion={suggestion}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
@@ -535,7 +547,7 @@ export function AIChat() {
                 <Suggestions className="mb-3">
                   {visibleSuggestions.map((suggestion) => (
                     <Suggestion
-                      className="h-8 rounded-full border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-none hover:border-cyan-200 hover:bg-cyan-50"
+                      className="h-8 shrink-0 rounded-full border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-none hover:border-cyan-200 hover:bg-cyan-50"
                       disabled={isGenerating}
                       key={suggestion}
                       onClick={submitText}
