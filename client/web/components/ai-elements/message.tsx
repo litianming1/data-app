@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import type {
   ComponentProps,
-  CSSProperties,
   HTMLAttributes,
   ReactElement,
   ReactNode,
@@ -345,16 +344,6 @@ export type MessageResponseProps = ComponentProps<typeof Streamdown>;
 const streamdownPlugins = { cjk, code, math, mermaid };
 const codeLanguagePattern = /language-([^\s]+)/;
 const plainTextLanguages = new Set(["", "plain", "text", "txt"]);
-const plainTextCodeStyle: CSSProperties = {
-  color: "#020617",
-  fontFamily: '"Cascadia Mono", Consolas, "Courier New", monospace',
-  fontVariantLigatures: "none",
-  letterSpacing: "0",
-  lineHeight: "1.5rem",
-  MozOsxFontSmoothing: "grayscale",
-  textRendering: "geometricPrecision",
-  WebkitFontSmoothing: "antialiased",
-};
 
 type TableCopyFormat = "markdown" | "csv" | "tsv";
 
@@ -499,6 +488,7 @@ const MessagePlainTextCodeBlock = ({
 }) => (
   <CodeBlockContainer
     className={cn("my-4 w-full rounded-xl border-border bg-sidebar", className)}
+    data-plain-text-code="true"
     language={language || "text"}
   >
     <CodeBlockHeader language={language || "text"} />
@@ -516,10 +506,7 @@ const MessagePlainTextCodeBlock = ({
       data-language={language || "text"}
       data-streamdown="code-block-body"
     >
-      <pre
-        className="m-0 whitespace-pre bg-transparent tabular-nums"
-        style={plainTextCodeStyle}
-      ><code>{code}</code></pre>
+      <pre className="m-0 whitespace-pre bg-transparent tabular-nums"><code>{code}</code></pre>
     </div>
   </CodeBlockContainer>
 );

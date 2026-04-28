@@ -133,3 +133,18 @@
     @apply font-sans;
   }
 }
+
+@layer components {
+  [data-plain-text-code="true"],
+  [data-plain-text-code="true"] pre,
+  [data-plain-text-code="true"] code {
+    font-family: Consolas, "Courier New", monospace !important;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "calt" 0;
+    letter-spacing: 0;
+    line-height: 1.5rem;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
