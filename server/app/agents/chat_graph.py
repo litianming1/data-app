@@ -3,6 +3,7 @@ from typing import TypedDict
 from langgraph.graph import END, StateGraph
 
 from app.models.chat import ConversationMessage
+from app.models.skill import SkillItem
 from app.services.deepseek import DeepSeekService
 
 
@@ -10,6 +11,7 @@ class ChatState(TypedDict):
     message: str
     mode: str
     history: list[ConversationMessage]
+    triggered_skills: list[SkillItem]
     reply: str
 
 
@@ -22,7 +24,10 @@ def build_chat_graph(deepseek: DeepSeekService):
 
     async def call_model(state: ChatState) -> ChatState:
         reply = await deepseek.generate(
-            state["message"], state["mode"], state["history"]
+            state["message"],
+            state["mode"],
+            state["history"],
+            state["triggered_skills"],
         )
         return {**state, "reply": reply}
 

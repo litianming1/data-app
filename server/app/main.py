@@ -10,6 +10,7 @@ from app.core.config import get_settings
 from app.db.mongo import create_mongo_client, get_mongo_database
 from app.services.conversation_store import ConversationStore
 from app.services.deepseek import DeepSeekService
+from app.services.skill_store import SkillStore
 
 
 @asynccontextmanager
@@ -21,6 +22,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.postgres_pool = None
     app.state.conversation_store = ConversationStore(app.state.mongo_db)
     await app.state.conversation_store.ensure_indexes()
+    app.state.skill_store = SkillStore(app.state.mongo_db)
+    await app.state.skill_store.ensure_indexes()
+    await app.state.skill_store.seed_defaults()
     app.state.deepseek_service = DeepSeekService(settings)
     app.state.chat_graph = build_chat_graph(app.state.deepseek_service)
 

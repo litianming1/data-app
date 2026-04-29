@@ -1,31 +1,25 @@
 "use client";
 
+import { useWorkspaceChrome } from "@/components/layout/workspace-shell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
   ChevronDownIcon,
-  ChevronRightIcon,
   CircleIcon,
   CopyIcon,
   DownloadIcon,
-  FolderIcon,
-  Grid2X2Icon,
   ImageIcon,
-  MenuIcon,
   MicIcon,
   MoreHorizontalIcon,
-  PenLineIcon,
   PlusIcon,
   RotateCwIcon,
   Share2Icon,
-  SparklesIcon,
   ThumbsDownIcon,
   ThumbsUpIcon,
   VideoIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 
 const mediaKindOptions = [
@@ -45,13 +39,6 @@ const historyItems = [
   "电商主图方案",
   "人物设定草案",
   "品牌视觉扩写",
-];
-
-const navItems = [
-  { href: "/chat", icon: PenLineIcon, label: "新对话", shortcut: "Ctrl K" },
-  { active: true, href: "/create", icon: SparklesIcon, label: "AI 创作" },
-  { href: "#", icon: FolderIcon, label: "云盘" },
-  { href: "#", icon: Grid2X2Icon, label: "更多", trailing: true },
 ];
 
 const defaultPrompt =
@@ -146,94 +133,43 @@ export function AICreate() {
 
   const ratioOrDuration = selectedMediaKind === "video" ? selectedDuration : selectedRatio;
 
-  return (
-    <main className="flex h-dvh min-w-0 overflow-hidden bg-white text-slate-950">
-      <aside className="hidden h-dvh w-64 shrink-0 overflow-hidden border-slate-200 border-r bg-slate-50 md:block">
-        <div className="flex h-full w-64 flex-col">
-          <div className="shrink-0 border-slate-200 border-b px-4 pb-3 pt-4">
-            <div className="mb-4 flex items-center gap-2 px-1">
-              <div className="flex size-7 items-center justify-center rounded-full bg-linear-to-br from-cyan-500 to-blue-600 font-semibold text-[11px] text-white shadow-sm shadow-cyan-500/20">
-                AI
-              </div>
-              <span className="font-semibold text-sm">AI App</span>
-            </div>
-
-            <nav className="space-y-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const content = (
-                  <>
-                    <Icon className="size-4 text-neutral-700" />
-                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                    {item.shortcut && (
-                      <span className="text-[11px] text-neutral-300">
-                        {item.shortcut}
-                      </span>
-                    )}
-                    {item.trailing && (
-                      <ChevronRightIcon className="size-4 text-neutral-300" />
-                    )}
-                  </>
-                );
-
-                const className = item.active
-                  ? "flex h-8 w-full items-center gap-2 rounded-xl bg-white px-2 text-left text-sm shadow-sm ring-1 ring-cyan-100"
-                  : "flex h-8 w-full items-center gap-2 rounded-xl px-2 text-left text-sm transition-colors hover:bg-white/80";
-
-                if (item.href === "#") {
-                  return (
-                    <button className={className} key={item.label} type="button">
-                      {content}
-                    </button>
-                  );
-                }
-
-                return (
-                  <Link className={className} href={item.href} key={item.label}>
-                    {content}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
-            <p className="mb-2 px-1 font-medium text-[11px] text-slate-400">
-              最近创作
-            </p>
-            <div className="space-y-1 pb-3">
-              {historyItems.map((item) => (
-                <button
-                  className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-left text-sm text-slate-700 transition-colors hover:bg-white"
-                  key={item}
-                  onClick={() => setBrief(item)}
-                  type="button"
-                >
-                  <CircleIcon className="size-3.5 text-slate-300" />
-                  <span className="truncate">{item}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+  const sidebarContent = useMemo(
+    () => (
+      <>
+        <p className="mb-2 px-1 font-medium text-[11px] text-slate-400">
+          最近创作
+        </p>
+        <div className="space-y-1 pb-3">
+          {historyItems.map((item) => (
+            <button
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-left text-sm text-slate-700 transition-colors hover:bg-white"
+              key={item}
+              onClick={() => setBrief(item)}
+              type="button"
+            >
+              <CircleIcon className="size-3.5 text-slate-300" />
+              <span className="truncate">{item}</span>
+            </button>
+          ))}
         </div>
-      </aside>
+      </>
+    ),
+    []
+  );
 
-      <section className="relative flex min-w-0 flex-1 flex-col bg-white">
-        <header className="grid h-11 shrink-0 grid-cols-[auto_1fr_auto] items-center border-slate-100 border-b bg-white/90 px-3 backdrop-blur">
-          <Link
-            aria-label="返回对话"
-            className="flex size-8 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100"
-            href="/chat"
-          >
-            <MenuIcon className="size-4" />
-          </Link>
-          <div className="min-w-0 text-center leading-tight">
-            <h1 className="font-medium text-sm">AI 创作</h1>
-            <p className="text-[11px] text-slate-400">图片 / 视频对话式生成</p>
-          </div>
-          <div aria-hidden="true" className="size-8" />
-        </header>
+  const chrome = useMemo(
+    () => ({
+      description: "图片 / 视频对话式生成",
+      sidebarContent,
+      title: "AI 创作",
+    }),
+    [sidebarContent]
+  );
 
+  useWorkspaceChrome(chrome);
+
+  return (
+    <div className="relative flex h-full min-h-0 flex-col bg-white">
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-40 pt-5">
           <div className="mx-auto w-full max-w-3xl space-y-7">
             <div className="flex justify-end">
@@ -408,7 +344,6 @@ export function AICreate() {
             </p>
           </div>
         </div>
-      </section>
-    </main>
+    </div>
   );
 }
