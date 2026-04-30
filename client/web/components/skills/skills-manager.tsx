@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { getApiBaseUrl } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import {
   BrainCircuitIcon,
   CircleIcon,
@@ -95,12 +95,8 @@ const getValidationMessage = (error: z.ZodError) =>
   error.issues[0]?.message ?? "提交内容校验失败";
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+  const response = await apiFetch(path, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
   });
 
   if (!response.ok) {
@@ -349,7 +345,7 @@ export function SkillsManager() {
   const sidebarContent = useMemo(
     () => (
       <>
-        <p className="mb-2 px-1 font-medium text-[11px] text-slate-400">
+        <p className="mb-2 px-1 font-medium text-[11px] text-muted-foreground">
           Skill 分组
         </p>
         <div className="space-y-1 pb-3">
@@ -360,8 +356,8 @@ export function SkillsManager() {
               <button
                 className={
                   isSelected
-                    ? "flex h-8 w-full items-center gap-2 rounded-lg bg-white px-2 text-left text-sm text-slate-800 shadow-sm ring-1 ring-cyan-100"
-                    : "flex h-8 w-full items-center gap-2 rounded-lg px-2 text-left text-sm text-slate-700 transition-colors hover:bg-white"
+                    ? "flex h-8 w-full items-center gap-2 rounded-lg bg-sidebar-accent px-2 text-left text-sm text-sidebar-accent-foreground shadow-sm ring-1 ring-sidebar-border"
+                    : "flex h-8 w-full items-center gap-2 rounded-lg px-2 text-left text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent"
                 }
                 key={category}
                 onClick={() => setSelectedCategory(category)}
@@ -369,7 +365,7 @@ export function SkillsManager() {
               >
                 <CircleIcon
                   className={
-                    isSelected ? "size-3.5 text-cyan-500" : "size-3.5 text-slate-300"
+                    isSelected ? "size-3.5 text-primary" : "size-3.5 text-muted-foreground/60"
                   }
                 />
                 <span className="truncate">{category}</span>
@@ -398,38 +394,38 @@ export function SkillsManager() {
       <div className="mx-auto grid w-full max-w-7xl gap-5 xl:grid-cols-[1fr_24rem]">
             <section className="space-y-5">
               <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                  <p className="text-slate-400 text-xs">总 Skills</p>
+                <div className="rounded-2xl border bg-card p-4 text-card-foreground shadow-sm">
+                  <p className="text-muted-foreground text-xs">总 Skills</p>
                   <p className="mt-2 font-semibold text-2xl">{skills.length}</p>
                 </div>
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
-                  <p className="text-emerald-600 text-xs">已启用</p>
-                  <p className="mt-2 font-semibold text-emerald-700 text-2xl">
+                <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 shadow-sm">
+                  <p className="text-emerald-600 text-xs dark:text-emerald-400">已启用</p>
+                  <p className="mt-2 font-semibold text-2xl text-emerald-700 dark:text-emerald-300">
                     {enabledCount}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                  <p className="text-slate-400 text-xs">已停用</p>
+                <div className="rounded-2xl border bg-card p-4 text-card-foreground shadow-sm">
+                  <p className="text-muted-foreground text-xs">已停用</p>
                   <p className="mt-2 font-semibold text-2xl">{disabledCount}</p>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="rounded-3xl border bg-card p-4 text-card-foreground shadow-sm">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
-                    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 font-medium text-cyan-700 text-xs">
+                    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary text-xs">
                       <WandSparklesIcon className="size-3.5" />
                       Skill Library
                     </div>
                     <h2 className="font-semibold text-xl tracking-tight">
                       管理 AI 工作流 Skills
                     </h2>
-                    <p className="mt-1 text-slate-500 text-sm">
+                    <p className="mt-1 text-muted-foreground text-sm">
                       通过后端 API 管理启用状态、触发词和说明。
                     </p>
                   </div>
                   <Button
-                    className="rounded-xl bg-cyan-600 text-white hover:bg-cyan-700"
+                    className="rounded-xl"
                     disabled={isSaving}
                     onClick={createDraftSkill}
                     type="button"
@@ -441,9 +437,9 @@ export function SkillsManager() {
 
                 <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_auto]">
                   <label className="relative block">
-                    <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                    <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      className="h-10 rounded-xl bg-slate-50 pl-9"
+                      className="h-10 rounded-xl bg-background pl-9"
                       onChange={(event) => setQuery(event.target.value)}
                       placeholder="搜索名称、描述或触发词"
                       value={query}
@@ -454,8 +450,8 @@ export function SkillsManager() {
                       <button
                         className={
                           selectedCategory === category
-                            ? "rounded-full bg-slate-950 px-3 py-1.5 text-white text-xs"
-                            : "rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-600 text-xs transition-colors hover:bg-slate-50"
+                            ? "rounded-full bg-primary px-3 py-1.5 text-primary-foreground text-xs"
+                            : "rounded-full border bg-card px-3 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-muted"
                         }
                         key={category}
                         onClick={() => setSelectedCategory(category)}
@@ -468,7 +464,7 @@ export function SkillsManager() {
                 </div>
 
                 {errorMessage && (
-                  <div className="mt-4 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-rose-700 text-sm">
+                  <div className="mt-4 rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-destructive text-sm">
                     {errorMessage}
                   </div>
                 )}
@@ -476,12 +472,12 @@ export function SkillsManager() {
 
               <div className="grid gap-3 lg:grid-cols-2">
                 {isLoading ? (
-                  <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-500 text-sm shadow-sm lg:col-span-2">
+                  <div className="rounded-2xl border bg-card p-6 text-muted-foreground text-sm shadow-sm lg:col-span-2">
                     正在从后端加载 Skills…
                   </div>
                 ) : null}
                 {!isLoading && filteredSkills.length === 0 ? (
-                  <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-500 text-sm shadow-sm lg:col-span-2">
+                  <div className="rounded-2xl border bg-card p-6 text-muted-foreground text-sm shadow-sm lg:col-span-2">
                     没有匹配的 Skill
                   </div>
                 ) : null}
@@ -493,8 +489,8 @@ export function SkillsManager() {
                     <article
                       className={
                         isSelected
-                          ? "rounded-2xl border border-cyan-200 bg-white p-4 shadow-sm ring-1 ring-cyan-100"
-                          : "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-cyan-200"
+                          ? "rounded-2xl border border-primary/30 bg-card p-4 shadow-sm ring-1 ring-primary/20"
+                          : "rounded-2xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/50"
                       }
                       key={skill.id}
                     >
@@ -505,12 +501,12 @@ export function SkillsManager() {
                           type="button"
                         >
                           <div className="flex items-center gap-2">
-                            <BrainCircuitIcon className="size-4 text-cyan-600" />
-                            <h3 className="truncate font-semibold text-slate-950 text-sm">
+                            <BrainCircuitIcon className="size-4 text-primary" />
+                            <h3 className="truncate font-semibold text-card-foreground text-sm">
                               {skill.name}
                             </h3>
                           </div>
-                          <p className="mt-2 line-clamp-2 text-slate-500 text-sm leading-6">
+                          <p className="mt-2 line-clamp-2 text-muted-foreground text-sm leading-6">
                             {skill.description}
                           </p>
                         </button>
@@ -525,19 +521,19 @@ export function SkillsManager() {
                         <Badge
                           className={
                             isEnabled
-                              ? "bg-emerald-50 text-emerald-700"
-                              : "bg-slate-100 text-slate-500"
+                              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                              : "bg-muted text-muted-foreground"
                           }
                           variant="secondary"
                         >
                           {isEnabled ? "启用" : "停用"}
                         </Badge>
                         <Badge variant="outline">{skill.category}</Badge>
-                        <span className="text-slate-400 text-xs">
+                        <span className="text-muted-foreground text-xs">
                           使用 {skill.usageCount} 次
                         </span>
                       </div>
-                      <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-slate-500 text-xs">
+                      <p className="mt-3 rounded-xl bg-muted/50 px-3 py-2 text-muted-foreground text-xs">
                         触发：{skill.trigger}
                       </p>
                     </article>
@@ -546,12 +542,12 @@ export function SkillsManager() {
               </div>
             </section>
 
-            <aside className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm xl:sticky xl:top-6 xl:self-start">
+            <aside className="rounded-3xl border bg-card p-4 text-card-foreground shadow-sm xl:sticky xl:top-6 xl:self-start">
               {selectedSkill ? (
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-slate-400 text-xs">当前 Skill</p>
+                      <p className="text-muted-foreground text-xs">当前 Skill</p>
                       <h2 className="mt-1 font-semibold text-lg">
                         {selectedSkill.name}
                       </h2>
@@ -565,7 +561,7 @@ export function SkillsManager() {
                   </div>
 
                   <label className="grid gap-1.5">
-                    <span className="font-medium text-slate-600 text-xs">名称</span>
+                    <span className="font-medium text-muted-foreground text-xs">名称</span>
                     <Input {...register("name")} aria-invalid={!!errors.name} />
                     {errors.name ? (
                       <span className="text-rose-600 text-xs">
@@ -575,7 +571,7 @@ export function SkillsManager() {
                   </label>
 
                   <label className="grid gap-1.5">
-                    <span className="font-medium text-slate-600 text-xs">分类</span>
+                    <span className="font-medium text-muted-foreground text-xs">分类</span>
                     <Input
                       {...register("category")}
                       aria-invalid={!!errors.category}
@@ -588,7 +584,7 @@ export function SkillsManager() {
                   </label>
 
                   <label className="grid gap-1.5">
-                    <span className="font-medium text-slate-600 text-xs">描述</span>
+                    <span className="font-medium text-muted-foreground text-xs">描述</span>
                     <Textarea
                       {...register("description")}
                       aria-invalid={!!errors.description}
@@ -602,7 +598,7 @@ export function SkillsManager() {
                   </label>
 
                   <label className="grid gap-1.5">
-                    <span className="font-medium text-slate-600 text-xs">触发词</span>
+                    <span className="font-medium text-muted-foreground text-xs">触发词</span>
                     <Input
                       {...register("trigger")}
                       aria-invalid={!!errors.trigger}
@@ -615,7 +611,7 @@ export function SkillsManager() {
                   </label>
 
                   <label className="grid gap-1.5">
-                    <span className="font-medium text-slate-600 text-xs">说明</span>
+                    <span className="font-medium text-muted-foreground text-xs">说明</span>
                     <Textarea
                       {...register("instructions")}
                       aria-invalid={!!errors.instructions}
@@ -629,7 +625,7 @@ export function SkillsManager() {
                   </label>
 
                   <Button
-                    className="w-full rounded-xl bg-slate-950 text-white hover:bg-slate-800"
+                    className="w-full rounded-xl"
                     disabled={isDeleting || isSaving}
                     onClick={saveSelectedSkill}
                     type="button"
@@ -639,7 +635,7 @@ export function SkillsManager() {
                   </Button>
 
                   <Button
-                    className="w-full rounded-xl border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                    className="w-full rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                     disabled={isDeleting || isSaving}
                     onClick={() => void deleteSelectedSkill()}
                     type="button"
@@ -649,14 +645,14 @@ export function SkillsManager() {
                     {isDeleting ? "删除中…" : "删除 Skill"}
                   </Button>
 
-                  <div className="rounded-2xl bg-slate-50 p-3 text-slate-500 text-xs leading-6">
+                  <div className="rounded-2xl bg-muted/50 p-3 text-muted-foreground text-xs leading-6">
                     最近更新：{selectedSkill.updatedAt}
                     <br />
                     当前配置已通过 FastAPI 写入 MongoDB。
                   </div>
                 </div>
               ) : (
-                <div className="rounded-2xl bg-slate-50 p-6 text-center text-slate-500 text-sm">
+                <div className="rounded-2xl bg-muted/50 p-6 text-center text-muted-foreground text-sm">
                   没有匹配的 Skill
                 </div>
               )}

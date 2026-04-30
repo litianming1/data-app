@@ -26,7 +26,7 @@ class ConversationStore:
 
     async def ensure_indexes(self) -> None:
         await self.collection.create_index(
-            [("conversation_id", 1), ("created_at", 1), ("_id", 1)]
+            [("user_id", 1), ("conversation_id", 1), ("created_at", 1), ("_id", 1)]
         )
 
     @staticmethod
@@ -35,10 +35,12 @@ class ConversationStore:
             return conversation_id
         return str(uuid4())
 
-    async def get_history(self, conversation_id: str) -> list[ConversationMessage]:
+    async def get_history(
+        self, conversation_id: str, user_id: str
+    ) -> list[ConversationMessage]:
         cursor = (
             self.collection.find(
-                {"conversation_id": conversation_id},
+                {"conversation_id": conversation_id, "user_id": user_id},
                 {"_id": 0, "role": 1, "content": 1},
             )
             .sort([("created_at", -1), ("_id", -1)])
@@ -47,15 +49,18 @@ class ConversationStore:
         documents = await cursor.to_list(length=self.history_limit)
         return [ConversationMessage(**document) for document in reversed(documents)]
 
-    async def conversation_exists(self, conversation_id: str) -> bool:
+    async def conversation_exists(self, conversation_id: str, user_id: str) -> bool:
         document = await self.collection.find_one(
-            {"conversation_id": conversation_id}, {"_id": 1}
+            {"conversation_id": conversation_id, "user_id": user_id}, {"_id": 1}
         )
         return document is not None
 
-    async def list_conversations(self, limit: int = 20) -> list[ConversationSummary]:
+    async def list_conversations(
+        self, user_id: str, limit: int = 20
+    ) -> list[ConversationSummary]:
         safe_limit = max(1, min(limit, 100))
         pipeline = [
+            {"$match": {"user_id": user_id}},
             {"$sort": {"conversation_id": 1, "created_at": 1, "_id": 1}},
             {
                 "$group": {
@@ -102,19 +107,24 @@ class ConversationStore:
         return summaries
 
     async def append_message(
-        self, conversation_id: str, role: MessageRole, content: str
+        self, conversation_id: str, role: MessageRole, content: str, user_id: str
     ) -> None:
         await self.collection.insert_one(
             {
                 "conversation_id": conversation_id,
                 "role": role,
                 "content": content,
+                "user_id": user_id,
                 "created_at": datetime.now(UTC),
             }
         )
 
     async def append_exchange(
-        self, conversation_id: str, user_message: str, assistant_message: str
+        self,
+        conversation_id: str,
+        user_message: str,
+        assistant_message: str,
+        user_id: str,
     ) -> None:
         now = datetime.now(UTC)
         await self.collection.insert_many(
@@ -123,12 +133,14 @@ class ConversationStore:
                     "conversation_id": conversation_id,
                     "role": "user",
                     "content": user_message,
+                    "user_id": user_id,
                     "created_at": now,
                 },
                 {
                     "conversation_id": conversation_id,
                     "role": "assistant",
                     "content": assistant_message,
+                    "user_id": user_id,
                     "created_at": now,
                 },
             ]

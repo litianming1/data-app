@@ -29,7 +29,7 @@ import {
   Suggestions,
 } from "@/components/ai-elements/suggestion";
 import { useWorkspaceChrome } from "@/components/layout/workspace-shell";
-import { getApiBaseUrl } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,15 +54,15 @@ import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const promptSuggestions = [
-  "帮我规划一个 Next.js AI 应用结构",
-  "把这个需求拆成可执行任务",
-  "写一个支持 Markdown 的产品介绍",
-  "解释 AI 对话页的核心交互流程",
-  "生成一组适合首页的快捷提示词",
-  "帮我优化这段 TypeScript 组件",
-  "设计一个轻量级会话历史方案",
-  "总结 React 19 的开发注意点",
-  "给我 3 个 AI 产品界面灵感",
+  "帮我分析一个跨境电商爆品机会",
+  "为 Amazon Listing 写五点描述和标题",
+  "生成一套 TikTok Shop 短视频脚本",
+  "优化独立站产品页转化文案",
+  "整理一份 Shopify 店铺运营计划",
+  "分析欧美市场用户痛点和卖点",
+  "帮我写跨境客服英文回复模板",
+  "设计一套 Facebook 广告投放角度",
+  "把产品资料改写成多语言营销文案",
 ];
 
 const quickModes = [
@@ -101,6 +101,17 @@ const getMessageText = (message: UIMessage) =>
     .map((part) => part.text)
     .join("");
 
+const getConversationTitleFromMessages = (messages: UIMessage[]) => {
+  const firstUserMessage = messages.find((message) => message.role === "user");
+  const text = firstUserMessage ? getMessageText(firstUserMessage).trim() : "";
+
+  if (!text) {
+    return "新对话";
+  }
+
+  return text.length > 24 ? `${text.slice(0, 24)}…` : text;
+};
+
 const updateTextMessage = (message: UIMessage, text: string): UIMessage => ({
   ...message,
   parts: [{ text, type: "text" }],
@@ -116,7 +127,7 @@ const convertFileToMarkdown = async (file: File): Promise<MarkItDownResponse> =>
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${getApiBaseUrl()}/api/markitdown`, {
+  const response = await apiFetch("/api/markitdown", {
     body: formData,
     method: "POST",
   });
@@ -268,7 +279,7 @@ type ConversationHistoryResponse = {
 };
 
 const requestJson = async <T,>(path: string, signal?: AbortSignal): Promise<T> => {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, { signal });
+  const response = await apiFetch(path, { signal });
 
   if (!response.ok) {
     const detail = await response.text();
@@ -315,9 +326,8 @@ const streamAssistantReply = async (
   onConversation: (conversationId: string) => void,
   onSkills: (skills: TriggeredSkill[]) => void
 ) => {
-  const response = await fetch(`${getApiBaseUrl()}/api/chat/stream`, {
+  const response = await apiFetch("/api/chat/stream", {
     body: JSON.stringify({ conversation_id: conversationId, message, mode }),
-    headers: { "Content-Type": "application/json" },
     method: "POST",
     signal,
   });
@@ -410,6 +420,15 @@ export function AIChat() {
     () => quickModes.find((mode) => mode.id === quickModeId) ?? quickModes[0],
     [quickModeId]
   );
+  const activeConversationTitle = useMemo(() => {
+    const historyTitle = conversationId
+      ? conversationHistory.find(
+          (conversation) => conversation.conversation_id === conversationId
+        )?.title
+      : null;
+
+    return historyTitle ?? getConversationTitleFromMessages(messages);
+  }, [conversationHistory, conversationId, messages]);
   const SelectedQuickModeIcon = selectedQuickMode.icon;
 
   const clearPendingReply = useCallback(() => {
@@ -583,20 +602,20 @@ export function AIChat() {
   const sidebarContent = useMemo(
     () => (
       <>
-        <p className="mb-2 px-1 font-medium text-[11px] text-slate-400">
+        <p className="mb-2 px-1 font-medium text-[11px] text-muted-foreground">
           历史对话
         </p>
         <div className="space-y-1 pb-3">
           <button
-            className="flex h-8 w-full items-center gap-2 rounded-lg bg-white px-2 text-left text-sm text-slate-700 shadow-sm ring-1 ring-cyan-100 transition-colors hover:bg-cyan-50"
+            className="flex h-8 w-full items-center gap-2 rounded-lg bg-sidebar-accent px-2 text-left text-sm text-sidebar-accent-foreground shadow-sm ring-1 ring-sidebar-border transition-colors hover:bg-sidebar-accent/80"
             onClick={resetConversation}
             type="button"
           >
-            <SparklesIcon className="size-3.5 text-cyan-600" />
+            <SparklesIcon className="size-3.5 text-primary" />
             <span className="truncate">开启新对话</span>
           </button>
           {isHistoryLoading ? (
-            <div className="rounded-lg px-2 py-2 text-slate-400 text-xs">
+            <div className="rounded-lg px-2 py-2 text-muted-foreground text-xs">
               正在加载历史…
             </div>
           ) : null}
@@ -606,7 +625,7 @@ export function AIChat() {
             </div>
           ) : null}
           {!isHistoryLoading && !historyError && conversationHistory.length === 0 ? (
-            <div className="rounded-lg px-2 py-2 text-slate-400 text-xs leading-5">
+            <div className="rounded-lg px-2 py-2 text-muted-foreground text-xs leading-5">
               暂无历史对话，发起第一条消息吧。
             </div>
           ) : null}
@@ -618,8 +637,8 @@ export function AIChat() {
               <button
                 className={
                   isActive
-                    ? "flex min-h-10 w-full items-start gap-2 rounded-lg bg-cyan-50 px-2 py-2 text-left text-sm text-cyan-900 ring-1 ring-cyan-100"
-                    : "flex min-h-10 w-full items-start gap-2 rounded-lg px-2 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-white"
+                    ? "flex min-h-10 w-full items-start gap-2 rounded-lg bg-sidebar-accent px-2 py-2 text-left text-sm text-sidebar-accent-foreground ring-1 ring-sidebar-border"
+                    : "flex min-h-10 w-full items-start gap-2 rounded-lg px-2 py-2 text-left text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent"
                 }
                 disabled={isLoading}
                 key={conversation.conversation_id}
@@ -629,15 +648,15 @@ export function AIChat() {
                 <CircleIcon
                   className={
                     isActive
-                      ? "mt-0.5 size-3.5 shrink-0 text-cyan-500"
-                      : "mt-0.5 size-3.5 shrink-0 text-slate-300"
+                      ? "mt-0.5 size-3.5 shrink-0 text-primary"
+                      : "mt-0.5 size-3.5 shrink-0 text-muted-foreground/60"
                   }
                 />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate">
                     {isLoading ? "加载中…" : conversation.title}
                   </span>
-                  <span className="mt-0.5 block truncate text-[11px] text-slate-400">
+                  <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
                     {conversation.preview}
                   </span>
                 </span>
@@ -662,9 +681,9 @@ export function AIChat() {
     () => ({
       description: "AI 生成内容仅供参考，请结合实际判断",
       sidebarContent,
-      title: "新对话",
+      title: activeConversationTitle,
     }),
-    [sidebarContent]
+    [activeConversationTitle, sidebarContent]
   );
 
   useWorkspaceChrome(chrome);
@@ -687,12 +706,12 @@ export function AIChat() {
             <Conversation className="min-h-0 flex-1">
               <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 py-8">
                 {triggeredSkills.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cyan-100 bg-cyan-50/70 px-4 py-3 text-cyan-800 text-xs">
+                  <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-primary/20 bg-primary/10 px-4 py-3 text-primary text-xs">
                     <BrainCircuitIcon className="size-4" />
                     <span className="font-medium">已触发 Skills</span>
                     {triggeredSkills.map((skill) => (
                       <Badge
-                        className="border-cyan-200 bg-white/80 text-cyan-700"
+                        className="border-primary/20 bg-background/80 text-primary"
                         key={skill.id}
                         variant="outline"
                       >
@@ -706,8 +725,8 @@ export function AIChat() {
                     <MessageContent
                       className={
                         message.role === "user"
-                          ? "max-w-[min(75%,32rem)] rounded-2xl bg-slate-100 px-4 py-3 text-slate-950 shadow-sm"
-                          : "max-w-3xl rounded-2xl bg-transparent px-1 py-1 text-slate-900"
+                          ? "max-w-[min(75%,32rem)] rounded-2xl bg-muted px-4 py-3 text-foreground shadow-sm"
+                          : "max-w-3xl rounded-2xl bg-transparent px-1 py-1 text-foreground"
                       }
                     >
                       {message.role === "user" ? (
@@ -726,7 +745,7 @@ export function AIChat() {
                 ))}
                 {shouldShowGeneratingPlaceholder && (
                   <Message from="assistant">
-                    <MessageContent className="rounded-2xl bg-transparent px-1 py-1 text-slate-500">
+                    <MessageContent className="rounded-2xl bg-transparent px-1 py-1 text-muted-foreground">
                       <div className="flex items-center gap-2 text-sm">
                         <BotIcon className="size-4 animate-pulse" />
                         正在组织回复...
@@ -735,7 +754,7 @@ export function AIChat() {
                   </Message>
                 )}
               </ConversationContent>
-              <ConversationScrollButton className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50" />
+              <ConversationScrollButton className="border-border bg-card text-card-foreground hover:bg-muted" />
             </Conversation>
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center px-4 pb-36 text-center">
@@ -745,7 +764,7 @@ export function AIChat() {
               <div className="flex w-full max-w-3xl flex-wrap justify-center gap-2">
                 {visibleSuggestions.map((suggestion) => (
                   <Suggestion
-                    className="h-9 rounded-xl border border-slate-200 bg-white px-4 text-slate-800 shadow-sm shadow-slate-200/50 hover:border-cyan-200 hover:bg-cyan-50"
+                    className="h-9 rounded-xl border bg-card px-4 text-card-foreground shadow-sm hover:bg-muted"
                     disabled={isGenerating}
                     key={suggestion}
                     onClick={submitText}
@@ -756,13 +775,13 @@ export function AIChat() {
             </div>
           )}
 
-          <div className="shrink-0 bg-linear-to-t from-white via-white to-white/70 px-4 pb-4 pt-3">
+          <div className="shrink-0 bg-linear-to-t from-background via-background to-background/70 px-4 pb-4 pt-3">
             <div className="mx-auto w-full max-w-3xl">
               {hasConversation && (
                 <Suggestions className="mb-3">
                   {visibleSuggestions.map((suggestion) => (
                     <Suggestion
-                      className="h-8 shrink-0 rounded-full border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-none hover:border-cyan-200 hover:bg-cyan-50"
+                      className="h-8 shrink-0 rounded-full border bg-card px-3 text-card-foreground text-xs shadow-none hover:bg-muted"
                       disabled={isGenerating}
                       key={suggestion}
                       onClick={submitText}
@@ -773,7 +792,7 @@ export function AIChat() {
               )}
 
               {markitdownMessage ? (
-                <div className="mb-2 rounded-xl border border-cyan-100 bg-cyan-50 px-3 py-2 text-cyan-700 text-xs">
+                <div className="mb-2 rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-primary text-xs">
                   {markitdownMessage}
                 </div>
               ) : null}
@@ -785,11 +804,11 @@ export function AIChat() {
 
               <PromptInputProvider>
               <PromptInput
-                className="overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-[0_12px_40px_rgba(59,130,246,0.14)] ring-1 ring-blue-100/80"
+                className="overflow-hidden rounded-2xl border bg-card shadow-[0_12px_40px_rgba(15,23,42,0.10)] ring-1 ring-border/80"
                 onSubmit={(message) => submitText(message.text)}
               >
                 <PromptInputTextarea
-                  className="min-h-14 px-4 pt-4 text-neutral-900 placeholder:text-neutral-400"
+                  className="min-h-14 px-4 pt-4 text-foreground placeholder:text-muted-foreground"
                   placeholder="发消息..."
                 />
                 <PromptInputFooter className="flex-col items-stretch gap-2 px-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
@@ -818,7 +837,7 @@ export function AIChat() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="start"
-                        className="w-48 rounded-xl border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-900/10"
+                        className="w-48 rounded-xl border-border bg-popover p-1.5 text-popover-foreground shadow-xl shadow-foreground/10"
                         side="top"
                         sideOffset={10}
                       >
@@ -835,12 +854,12 @@ export function AIChat() {
                                 key={mode.id}
                                 value={mode.id}
                               >
-                                <Icon className="mt-0.5 size-4 text-slate-800" />
+                                <Icon className="mt-0.5 size-4 text-foreground" />
                                 <span className="grid gap-0.5 text-left">
-                                  <span className="font-medium text-slate-900 text-sm">
+                                  <span className="font-medium text-foreground text-sm">
                                     {mode.label}
                                   </span>
-                                  <span className="text-slate-400 text-xs">
+                                  <span className="text-muted-foreground text-xs">
                                     {mode.description}
                                   </span>
                                 </span>

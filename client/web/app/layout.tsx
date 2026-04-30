@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "streamdown/styles.css";
+import "@react-email/editor/themes/default.css";
+import "@react-email/editor/styles/bubble-menu.css";
+import "@react-email/editor/styles/slash-command.css";
+import { AuthProvider } from "@/components/auth/auth-provider";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = Geist({
@@ -28,9 +33,14 @@ export default function RootLayout({
     <html
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       lang="en"
+      suppressHydrationWarning
     >
       <body>
-        <TooltipProvider>{children}</TooltipProvider>
+        <TooltipProvider>
+          <ThemeProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </ThemeProvider>
+        </TooltipProvider>
       </body>
     </html>
   );
