@@ -9,8 +9,10 @@ from app.api.routes import router
 from app.core.config import get_settings
 from app.db.mongo import create_mongo_client, get_mongo_database
 from app.services.conversation_store import ConversationStore
+from app.services.auth_service import AuthService
 from app.services.deepseek import DeepSeekService
 from app.services.skill_store import SkillStore
+from app.services.user_store import UserStore
 
 
 @asynccontextmanager
@@ -22,6 +24,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.postgres_pool = None
     app.state.conversation_store = ConversationStore(app.state.mongo_db)
     await app.state.conversation_store.ensure_indexes()
+    app.state.auth_service = AuthService(
+        secret_key=settings.auth_secret_key,
+        token_expire_minutes=settings.auth_token_expire_minutes,
+    )
+    app.state.user_store = UserStore(app.state.mongo_db)
+    await app.state.user_store.ensure_indexes()
+    await app.state.user_store.seed_admin(
+        settings.admin_email, settings.admin_password, app.state.auth_service
+    )
     app.state.skill_store = SkillStore(app.state.mongo_db)
     await app.state.skill_store.ensure_indexes()
     await app.state.skill_store.seed_defaults()

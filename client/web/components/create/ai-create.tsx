@@ -136,18 +136,18 @@ export function AICreate() {
   const sidebarContent = useMemo(
     () => (
       <>
-        <p className="mb-2 px-1 font-medium text-[11px] text-slate-400">
+        <p className="mb-2 px-1 font-medium text-[11px] text-muted-foreground">
           最近创作
         </p>
         <div className="space-y-1 pb-3">
           {historyItems.map((item) => (
             <button
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-left text-sm text-slate-700 transition-colors hover:bg-white"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-left text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent"
               key={item}
               onClick={() => setBrief(item)}
               type="button"
             >
-              <CircleIcon className="size-3.5 text-slate-300" />
+              <CircleIcon className="size-3.5 text-muted-foreground/60" />
               <span className="truncate">{item}</span>
             </button>
           ))}
@@ -169,47 +169,47 @@ export function AICreate() {
   useWorkspaceChrome(chrome);
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col bg-white">
+    <div className="relative flex h-full min-h-0 flex-col bg-background text-foreground">
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-40 pt-5">
           <div className="mx-auto w-full max-w-3xl space-y-7">
             <div className="flex justify-end">
-              <div className="max-w-[88%] rounded-2xl bg-blue-50 px-4 py-3 text-slate-900 text-sm leading-7 shadow-sm">
+              <div className="max-w-[88%] rounded-2xl bg-muted px-4 py-3 text-foreground text-sm leading-7 shadow-sm">
                 {submittedPrompt}
               </div>
             </div>
 
             <div className="space-y-4">
-              <p className="font-medium text-slate-900 text-sm">
+              <p className="font-medium text-foreground text-sm">
                 包在我身上！这就为您绘制这张静谧高级的自然风香水海报，质感拉满。
               </p>
 
-              <div className="grid overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm sm:grid-cols-4">
+              <div className="grid overflow-hidden rounded-xl border bg-muted shadow-sm sm:grid-cols-4">
                 {Array.from({ length: selectedMediaKind === "video" ? 2 : 4 }).map((_, index) => (
                   <VisualResultCard index={index} key={index} mediaKind={selectedMediaKind} />
                 ))}
               </div>
 
-              <div className="flex items-center gap-3 text-slate-500">
-                <button aria-label="下载" className="rounded-md p-1 transition-colors hover:bg-slate-100" type="button">
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <button aria-label="下载" className="rounded-md p-1 transition-colors hover:bg-muted" type="button">
                   <DownloadIcon className="size-4" />
                 </button>
-                <button aria-label="喜欢" className="rounded-md p-1 transition-colors hover:bg-slate-100" type="button">
+                <button aria-label="喜欢" className="rounded-md p-1 transition-colors hover:bg-muted" type="button">
                   <ThumbsUpIcon className="size-4" />
                 </button>
-                <button aria-label="不喜欢" className="rounded-md p-1 transition-colors hover:bg-slate-100" type="button">
+                <button aria-label="不喜欢" className="rounded-md p-1 transition-colors hover:bg-muted" type="button">
                   <ThumbsDownIcon className="size-4" />
                 </button>
-                <button aria-label="分享" className="rounded-md p-1 transition-colors hover:bg-slate-100" type="button">
+                <button aria-label="分享" className="rounded-md p-1 transition-colors hover:bg-muted" type="button">
                   <Share2Icon className="size-4" />
                 </button>
-                <button aria-label="重新生成" className="rounded-md p-1 transition-colors hover:bg-slate-100" type="button">
+                <button aria-label="重新生成" className="rounded-md p-1 transition-colors hover:bg-muted" type="button">
                   <RotateCwIcon className="size-4" />
                 </button>
-                <button aria-label="更多" className="rounded-md p-1 transition-colors hover:bg-slate-100" type="button">
+                <button aria-label="更多" className="rounded-md p-1 transition-colors hover:bg-muted" type="button">
                   <MoreHorizontalIcon className="size-4" />
                 </button>
                 <button
-                  className="ml-auto inline-flex items-center gap-1 rounded-full border border-slate-200 px-2.5 py-1 text-xs transition-colors hover:bg-slate-50"
+                  className="ml-auto inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors hover:bg-muted"
                   onClick={copyPrompt}
                   type="button"
                 >
@@ -218,14 +218,14 @@ export function AICreate() {
                 </button>
               </div>
 
-              <div className="max-w-xl rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-slate-600 text-xs leading-6">
+              <div className="max-w-xl rounded-2xl border bg-muted/50 px-4 py-3 text-muted-foreground text-xs leading-6">
                 {generatedPrompt}
               </div>
 
               <div className="space-y-2">
                 {suggestionItems.map((item) => (
                   <button
-                    className="block rounded-xl border border-slate-200 bg-white px-4 py-2 text-left text-slate-700 text-sm shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50"
+                    className="block rounded-xl border bg-card px-4 py-2 text-left text-card-foreground text-sm shadow-sm transition-colors hover:bg-muted"
                     key={item}
                     onClick={() => {
                       const nextPrompt = `${submittedPrompt}，${item}`;
@@ -243,7 +243,7 @@ export function AICreate() {
             <div className="flex justify-center">
               <button
                 aria-label="滚动到底部"
-                className="flex size-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-md shadow-slate-200/70 transition-colors hover:bg-slate-50"
+                className="flex size-8 items-center justify-center rounded-full border bg-card text-muted-foreground shadow-md transition-colors hover:bg-muted"
                 type="button"
               >
                 <ArrowDownIcon className="size-4" />
@@ -252,11 +252,11 @@ export function AICreate() {
           </div>
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-white via-white to-white/0 px-4 pb-5 pt-12">
+        <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-background via-background to-background/0 px-4 pb-5 pt-12">
           <div className="mx-auto w-full max-w-3xl">
-            <div className="rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_14px_50px_rgba(15,23,42,0.10)]">
+            <div className="rounded-3xl border bg-card p-3 shadow-[0_14px_50px_rgba(15,23,42,0.10)]">
               <Textarea
-                className="min-h-12 resize-none border-0 bg-transparent px-2 py-1 text-sm shadow-none outline-none placeholder:text-slate-400 focus-visible:ring-0"
+                className="min-h-12 resize-none border-0 bg-transparent px-2 py-1 text-sm shadow-none outline-none placeholder:text-muted-foreground focus-visible:ring-0"
                 onChange={(event) => setBrief(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey) {
@@ -281,8 +281,8 @@ export function AICreate() {
                     <button
                       className={
                         isSelected
-                          ? "inline-flex h-8 items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 font-medium text-blue-700 text-xs"
-                          : "inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-slate-600 text-xs transition-colors hover:bg-slate-50"
+                          ? "inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 font-medium text-primary text-xs"
+                          : "inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-muted-foreground text-xs transition-colors hover:bg-muted"
                       }
                       key={kind.id}
                       onClick={() => setSelectedMediaKind(kind.id)}
@@ -290,12 +290,12 @@ export function AICreate() {
                     >
                       <Icon className="size-3.5" />
                       {kind.label}
-                      {isSelected && <span className="text-blue-400">×</span>}
+                      {isSelected && <span className="text-primary/70">×</span>}
                     </button>
                   );
                 })}
 
-                <button className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-slate-700 text-xs transition-colors hover:bg-slate-50" type="button">
+                <button className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-muted-foreground text-xs transition-colors hover:bg-muted" type="button">
                   <ImageIcon className="size-3.5" />
                   参考图
                 </button>
@@ -303,7 +303,7 @@ export function AICreate() {
                 <div className="relative">
                   <select
                     aria-label={selectedMediaKind === "video" ? "视频时长" : "图片比例"}
-                    className="h-8 appearance-none rounded-lg border-0 bg-transparent py-0 pl-2.5 pr-6 text-slate-700 text-xs outline-none transition-colors hover:bg-slate-50"
+                    className="h-8 appearance-none rounded-lg border-0 bg-transparent py-0 pl-2.5 pr-6 text-muted-foreground text-xs outline-none transition-colors hover:bg-muted"
                     onChange={(event) => {
                       if (selectedMediaKind === "video") {
                         setSelectedDuration(event.target.value);
@@ -319,15 +319,15 @@ export function AICreate() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDownIcon className="pointer-events-none absolute right-1.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-500" />
+                  <ChevronDownIcon className="pointer-events-none absolute right-1.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 </div>
 
                 <div className="ml-auto flex items-center gap-2">
-                  <Button className="size-8 rounded-full text-slate-500" size="icon" type="button" variant="ghost">
+                  <Button className="size-8 rounded-full text-muted-foreground" size="icon" type="button" variant="ghost">
                     <MicIcon className="size-4" />
                   </Button>
                   <Button
-                    className="size-8 rounded-full bg-slate-300 text-white hover:bg-blue-600"
+                    className="size-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
                     disabled={!brief.trim()}
                     onClick={submitPrompt}
                     size="icon"
@@ -339,7 +339,7 @@ export function AICreate() {
               </div>
             </div>
 
-            <p className="mt-2 text-center text-[10px] text-slate-400">
+            <p className="mt-2 text-center text-[10px] text-muted-foreground">
               内容由 AI 生成，可能不准确，请注意核实
             </p>
           </div>

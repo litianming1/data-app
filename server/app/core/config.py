@@ -20,6 +20,12 @@ class Settings(BaseSettings):
         default="postgresql://postgres:postgres@localhost:5432/ai_app"
     )
 
+    auth_secret_key: str = "change-me-in-.env"
+    auth_cookie_name: str = "ai_app_session"
+    auth_token_expire_minutes: int = 60 * 24 * 7
+    admin_email: str = "admin@example.com"
+    admin_password: str = ""
+
     model_config = SettingsConfigDict(
         env_file=("../.env", ".env"),
         env_file_encoding="utf-8",

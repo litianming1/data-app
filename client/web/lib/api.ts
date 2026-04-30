@@ -11,3 +11,18 @@ export function getApiBaseUrl() {
 
   return `http://localhost:${backendPort}`;
 }
+
+export async function apiFetch(path: string, init?: RequestInit) {
+  const isFormData = init?.body instanceof FormData;
+  const headers = new Headers(init?.headers);
+
+  if (init?.body && !isFormData && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  return fetch(`${getApiBaseUrl()}${path}`, {
+    ...init,
+    credentials: "include",
+    headers,
+  });
+}
