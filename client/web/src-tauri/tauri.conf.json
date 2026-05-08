@@ -1,0 +1,35 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "AI App",
+  "version": "0.1.0",
+  "identifier": "com.aiapp.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:3000",
+    "beforeBuildCommand": "npm run build:tauri",
+    "frontendDist": "../out"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "AI App",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 1100,
+        "minHeight": 640,
+        "center": true,
+        "resizable": true,
+        "theme": null
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["../app/favicon.ico"]
+  }
+}

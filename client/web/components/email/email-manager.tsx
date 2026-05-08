@@ -27,6 +27,7 @@ import {
   CalendarIcon,
   MailIcon,
   ReplyIcon,
+  RotateCcwIcon,
   SearchIcon,
   SendIcon,
   ShoppingBagIcon,
@@ -551,6 +552,7 @@ export function EmailManager() {
   const [platformFilters, setPlatformFilters] = useState<string[]>([]);
   const [recipientEmailFilters, setRecipientEmailFilters] = useState<string[]>([]);
   const [searchContent, setSearchContent] = useState("");
+  const [searchDraft, setSearchDraft] = useState("");
   const [searchContentType, setSearchContentType] =
     useState<SearchContentType>("all");
   const [selectedThreadId, setSelectedThreadId] = useState(
@@ -658,6 +660,27 @@ export function EmailManager() {
     setCurrentPage(1);
   };
 
+  const applySearch = () => {
+    setSearchContent(searchDraft);
+    setCurrentPage(1);
+  };
+
+  const resetFilters = () => {
+    setAgentFilters([]);
+    setCurrentPage(1);
+    setEndTime("");
+    setPlatformFilters([]);
+    setRecipientEmailFilters([]);
+    setSearchContent("");
+    setSearchDraft("");
+    setSearchContentType("all");
+    setSelectedThreadId(mailThreads[0]?.id ?? "");
+    setStartTime("");
+    setStatusFilter("0");
+    setTagFilters([]);
+    setTimeType("receivedAt");
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden bg-muted/30 p-4 text-foreground">
       <Card className="shrink-0 gap-4 py-4">
@@ -761,18 +784,34 @@ export function EmailManager() {
                 options={searchContentTypeOptions}
                 value={searchContentType}
               />
-              <label className="relative block xl:col-span-3">
+              <label className="relative block xl:col-span-2">
                 <SearchIcon className="-translate-y-1/2 pointer-events-none absolute left-3 top-1/2 size-4 text-muted-foreground" />
                 <Input
                   className={`${searchControlClassName} px-10`}
-                  onChange={(event) => {
-                    setSearchContent(event.target.value);
-                    setCurrentPage(1);
+                  onChange={(event) => setSearchDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      applySearch();
+                    }
                   }}
                   placeholder="搜索内容"
-                  value={searchContent}
+                  value={searchDraft}
                 />
               </label>
+            <Button className="h-10 rounded-2xl" onClick={applySearch} type="button">
+              <SearchIcon className="size-4" />
+              搜索
+            </Button>
+            <Button
+              className="h-10 rounded-2xl"
+              onClick={resetFilters}
+              type="button"
+              variant="outline"
+            >
+              <RotateCcwIcon className="size-4" />
+              重置
+            </Button>
             <Button asChild className="h-10 rounded-2xl">
               <Link href="/email/editor">
                 <SendIcon className="size-4" />

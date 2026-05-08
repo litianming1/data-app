@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import {
   BrainCircuitIcon,
   CloudIcon,
+  HardDriveIcon,
   LogOutIcon,
   MailIcon,
   MenuIcon,
@@ -58,8 +59,6 @@ const WorkspaceChromeContext = createContext<WorkspaceChromeContextValue | null>
 const navItems = [
   { href: "/chat", icon: PenLineIcon, label: "AI 对话", shortcut: "Ctrl K" },
   { href: "/create", icon: SparklesIcon, label: "AI 创作" },
-  { href: "/skills", icon: BrainCircuitIcon, label: "Skills" },
-  { href: "/drive", icon: CloudIcon, label: "云盘" },
   { href: "/email", icon: MailIcon, label: "邮件管理" },
   { adminOnly: true, href: "/users", icon: UsersIcon, label: "用户管理" },
 ];
@@ -82,6 +81,10 @@ const routeChrome: Record<string, Required<Pick<WorkspaceChrome, "description" |
   "/drive": {
     description: "文件与素材管理即将上线",
     title: "云盘",
+  },
+  "/local-disk": {
+    description: "管理下载到本地的内容、文件与缓存",
+    title: "本地磁盘",
   },
   "/email": {
     description: "客户邮件、营销模板和自动化跟进",
@@ -227,6 +230,19 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56" side="top">
                     <DropdownMenuLabel>设置</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => router.push("/skills")}>
+                      <BrainCircuitIcon className="size-4" />
+                      Skills
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/drive")}>
+                      <CloudIcon className="size-4" />
+                      云盘
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/local-disk")}>
+                      <HardDriveIcon className="size-4" />
+                      本地磁盘
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuSub>
                       <DropdownMenuSubTrigger>
                         <SunIcon className="size-4" />

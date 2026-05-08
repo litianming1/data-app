@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Default permissions for the main AI App window.","local":true,"windows":["main"],"permissions":["core:default","core:app:allow-set-app-theme","dialog:allow-open","fs:allow-exists","fs:allow-lstat","fs:allow-mkdir","fs:allow-read-dir","fs:allow-remove","fs:allow-rename","fs:allow-stat","fs:allow-write-text-file","opener:default"]}}

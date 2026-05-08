@@ -126,6 +126,18 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html.theme-transition,
+  html.theme-transition * {
+    transition-duration: 180ms;
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html.theme-transition,
+    html.theme-transition * {
+      transition-duration: 0ms;
+    }
+  }
   body {
     @apply bg-background text-foreground;
   }

@@ -12,6 +12,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { buildChildPath } from "@/lib/local-disk-utils";
+import { readPersistedLocalDiskRoot } from "@/lib/local-disk-storage";
+import { isTauriRuntime, writeLocalTextFile } from "@/lib/tauri-local-disk";
 import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
 import { math } from "@streamdown/math";
@@ -22,6 +25,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CopyIcon,
+  DownloadIcon,
 } from "lucide-react";
 import type {
   ComponentProps,
@@ -43,7 +47,6 @@ import {
 import {
   CodeBlock,
   CodeBlockContainer,
-  CodeBlockDownloadButton,
   CodeBlockHeader,
   Streamdown,
   StreamdownContext,
@@ -434,6 +437,125 @@ const tableToText = (table: HTMLTableElement, format: TableCopyFormat) => {
     .join("\n");
 };
 
+const LANGUAGE_EXTENSION_MAP: Record<string, string> = {
+  javascript: "js",
+  typescript: "ts",
+  typescriptreact: "tsx",
+  javascriptreact: "jsx",
+  python: "py",
+  html: "html",
+  css: "css",
+  json: "json",
+  markdown: "md",
+  mdx: "mdx",
+  shell: "sh",
+  bash: "sh",
+  yaml: "yaml",
+  toml: "toml",
+  rust: "rs",
+  go: "go",
+  java: "java",
+  cpp: "cpp",
+  c: "c",
+  sql: "sql",
+  xml: "xml",
+  svg: "svg",
+};
+
+const MessageCodeBlockDownloadButton = ({
+  code,
+  language,
+}: {
+  code: string;
+  language: string;
+}) => {
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const anchorRef = useRef<HTMLAnchorElement>(null);
+  const timeoutRef = useRef<number>(0);
+
+  const ext =
+    LANGUAGE_EXTENSION_MAP[language.toLowerCase()] ??
+    (language.length <= 6 && /^[a-z]+$/.test(language) ? language : "txt");
+
+  const blobHref = useMemo(() => {
+    const blob = new Blob([code], { type: "text/plain" });
+    return URL.createObjectURL(blob);
+  }, [code]);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(timeoutRef.current);
+    },
+    []
+  );
+
+  const handleDownload = useCallback(async () => {
+    if (saveStatus !== "idle") {
+      return;
+    }
+
+    // In Tauri with a configured local disk root: write directly
+    if (isTauriRuntime()) {
+      const root = readPersistedLocalDiskRoot(window.localStorage);
+
+      if (root?.runtime === "tauri" && root.path) {
+        setSaveStatus("saving");
+
+        try {
+          const fileName = `code-${Date.now()}.${ext}`;
+          await writeLocalTextFile(buildChildPath(root.path, fileName), code);
+          setSaveStatus("saved");
+          timeoutRef.current = window.setTimeout(() => setSaveStatus("idle"), 2000);
+        } catch {
+          setSaveStatus("error");
+          timeoutRef.current = window.setTimeout(() => setSaveStatus("idle"), 2000);
+        }
+
+        return;
+      }
+    }
+
+    // Fall back to browser download
+    anchorRef.current?.click();
+  }, [code, ext, saveStatus]);
+
+  const title =
+    saveStatus === "saved"
+      ? "已保存到本地磁盘"
+      : saveStatus === "error"
+        ? "保存失败，请重试"
+        : "下载代码";
+
+  return (
+    <>
+      {/* Hidden anchor used for browser-side fallback download */}
+      <a
+        aria-hidden
+        className="hidden"
+        download={`file.${ext}`}
+        href={blobHref}
+        ref={anchorRef}
+        tabIndex={-1}
+      />
+      <button
+        aria-label={title}
+        className={cn(
+          "cursor-pointer p-1 transition-all disabled:cursor-not-allowed disabled:opacity-50",
+          saveStatus === "saved"
+            ? "text-[forestgreen]"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+        disabled={saveStatus === "saving"}
+        onClick={() => void handleDownload()}
+        title={title}
+        type="button"
+      >
+        {saveStatus === "saved" ? <CheckIcon size={14} /> : <DownloadIcon size={14} />}
+      </button>
+    </>
+  );
+};
+
 const MessageCodeBlockCopyButton = ({ code }: { code: string }) => {
   const [isCopied, setIsCopied] = useState(false);
   const timeoutRef = useRef<number>(0);
@@ -497,7 +619,7 @@ const MessagePlainTextCodeBlock = ({
         className="pointer-events-auto flex shrink-0 items-center gap-2 rounded-md border border-sidebar bg-sidebar/80 px-1.5 py-1 supports-backdrop-filter:bg-sidebar/70 supports-backdrop-filter:backdrop-blur"
         data-streamdown="code-block-actions"
       >
-        <CodeBlockDownloadButton code={code} language={language || "text"} />
+        <MessageCodeBlockDownloadButton code={code} language={language || "text"} />
         <MessageCodeBlockCopyButton code={code} />
       </div>
     </div>
@@ -554,7 +676,7 @@ const MessageMarkdownCode = ({
       language={language}
       lineNumbers={lineNumbers}
     >
-      <CodeBlockDownloadButton code={codeText} language={language} />
+      <MessageCodeBlockDownloadButton code={codeText} language={language} />
       <MessageCodeBlockCopyButton code={codeText} />
     </CodeBlock>
   );

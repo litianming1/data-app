@@ -333,8 +333,15 @@ const streamAssistantReply = async (
   });
 
   if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(detail || "后端 API 请求失败");
+    let detail = "后端 API 请求失败";
+    try {
+      const body = await response.json();
+      detail = body?.detail || body?.message || detail;
+    } catch {
+      const text = await response.text().catch(() => "");
+      if (text) detail = text;
+    }
+    throw new Error(detail);
   }
 
   if (!response.body) {
@@ -533,13 +540,13 @@ export function AIChat() {
           return;
         }
 
+        const errorMessage =
+          error instanceof Error ? error.message : "请求失败，请稍后重试。";
+
         setMessages((current) =>
           current.map((message) =>
             message.id === assistantMessage.id
-              ? updateTextMessage(
-                  message,
-                  "后端流式 API 暂时不可用，请确认 FastAPI 服务已启动后再试。"
-                )
+              ? updateTextMessage(message, errorMessage)
               : message
           )
         );

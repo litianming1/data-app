@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -19,7 +20,46 @@ type ThemeContextValue = {
 };
 
 const themeStorageKey = "ai-app-theme";
+const themeTransitionClassName = "theme-transition";
+const themeTransitionDuration = 220;
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+function enableThemeTransition() {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return undefined;
+  }
+
+  const root = document.documentElement;
+
+  root.classList.add(themeTransitionClassName);
+
+  const timeoutId = window.setTimeout(() => {
+    root.classList.remove(themeTransitionClassName);
+  }, themeTransitionDuration);
+
+  return () => {
+    window.clearTimeout(timeoutId);
+    root.classList.remove(themeTransitionClassName);
+  };
+}
+
+function getNativeTheme(theme: ThemeMode) {
+  return theme === "system" ? null : theme;
+}
+
+async function syncNativeTheme(theme: ThemeMode) {
+  if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) {
+    return;
+  }
+
+  const { setTheme } = await import("@tauri-apps/api/app");
+
+  await setTheme(getNativeTheme(theme));
+}
 
 function isThemeMode(value: string | null): value is ThemeMode {
   return value === "light" || value === "dark" || value === "system";
@@ -58,10 +98,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
   const [theme, setThemeState] = useState<ThemeMode>(() => getStoredTheme());
   const resolvedTheme = theme === "system" ? systemTheme : theme;
+  const hasAppliedTheme = useRef(false);
 
   useEffect(() => {
+    const cleanupTransition = hasAppliedTheme.current
+      ? enableThemeTransition()
+      : undefined;
+
     applyResolvedTheme(resolvedTheme);
+    hasAppliedTheme.current = true;
+
+    return cleanupTransition;
   }, [resolvedTheme]);
+
+  useEffect(() => {
+    void syncNativeTheme(theme).catch(() => undefined);
+  }, [theme]);
 
   useEffect(() => {
     if (theme !== "system") {
